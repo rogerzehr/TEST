@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="My PWA App">
+    <title>My PWA App</title>
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: #4285f4;
+            color: white;
+            padding: 16px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:active {
+            background-color: #3b78e7;
+        }
+        
+        .offline-message {
+            display: none;
+            background-color: #ffcc00;
+            padding: 8px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: white;
+            padding: 16px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .action-button {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            margin-top: 0;
+            color: #666;
+        }
+        
+        .action-button.active {
+            color: #4285f4;
+        }
+        
+        .icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My PWA App</h1>
+    </header>
+    
+    <main>
+        <div class="card">
+            <h2>Welcome to My App</h2>
+            <p>This is a Progressive Web App that works on iOS.</p>
+            <p>To install this app on your iPhone:</p>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Open this page in Safari</li>
+                <li>Tap the Share button</li>
+                <li>Scroll down and tap "Add to Home Screen"</li>
+                <li>Tap "Add" in the top-right corner</li>
+            </ol>
+            <button id="notify-btn">Enable Notifications</button>
+        </div>
+        
+        <div class="card">
+            <h2>Features</h2>
+            <p>This app demonstrates basic PWA features:</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Home screen installation</li>
+                <li>Offline capability</li>
+                <li>App-like navigation</li>
+                <li>Push notifications (where supported)</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>Device Information</h2>
+            <p id="device-info">Loading device information...</p>
+        </div>
+        
+        <!-- Add more content as needed -->
+        <div style="height: 80px;"></div> <!-- Spacer for action bar -->
+    </main>
+    
+    <div class="offline-message" id="offline-message">
+        You are currently offline. Some features may be unavailable.
+    </div>
+    
+    <div class="action-bar">
+        <button class="action-button active">
+            <div class="icon">🏠</div>
+            Home
+        </button>
+        <button class="action-button">
+            <div class="icon">🔍</div>
+            Search
+        </button>
+        <button class="action-button">
+            <div class="icon">👤</div>
+            Profile
+        </button>
+        <button class="action-button">
+            <div class="icon">⚙️</div>
+            Settings
+        </button>
+    </div>
+    
+    <script>
+        // Register service worker for offline capability
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Check online/offline status
+        function updateOnlineStatus() {
+            const offlineMessage = document.getElementById('offline-message');
+            if (navigator.onLine) {
+                offlineMessage.style.display = 'none';
+            } else {
+                offlineMessage.style.display = 'block';
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+        
+        // Device information
+        document.getElementById('device-info').textContent = `
+            User Agent: ${navigator.userAgent}
+            Platform: ${navigator.platform}
+            Screen: ${window.innerWidth}x${window.innerHeight}
+            Pixel Ratio: ${window.devicePixelRatio}
+        `;
+        
+        // Notification permission
+        document.getElementById('notify-btn').addEventListener('click', () => {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('Notification Enabled', {
+                            body: 'You will now receive notifications from this app.',
+                            icon: 'icon-192x192.png'
+                        });
+                    }
+                });
+            } else {
+                alert('Notifications are not supported on this device or browser.');
+            }
+        });
+        
+        // Action buttons
+        const actionButtons = document.querySelectorAll('.action-button');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                actionButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // You would typically load different content here
+                // For demo purposes, we're just changing the active state
+            });
+        });
+    </script>
+</body>
+</html>
